@@ -8,7 +8,7 @@ namespace AntsColonyTSP
 {
     public class TSP
     {
-        private List<Point> cities;
+        private Point[] cities;
         private Ant[] ants;
         private double alpha;
         private double beta;
@@ -16,20 +16,25 @@ namespace AntsColonyTSP
         private double pheromoneQuantity;
         private double[,] pheromoneIntensity;
         private double[,] citiesVisibility;
+        private int[] bestTour;
+        private double bestTourDistance = double.MaxValue;
 
         public double[,] PheromoneIntensity { get => pheromoneIntensity; set => pheromoneIntensity = value; }
         public double[,] CitiesVisibility { get => citiesVisibility; set => citiesVisibility = value; }
         public double Alpha { get => alpha; set => alpha = value; }
         public double Beta { get => beta; set => beta = value; }
         public double PheromoneQuantity { get => pheromoneQuantity; set => pheromoneQuantity = value; }
+        public Ant[] Ants { get => ants; set => ants = value; }
+        public double BestTourDistance { get => bestTourDistance; set => bestTourDistance = value; }
 
         public TSP(int citiesNum, int antsNum, double alpha, double beta, double rho, double quantity)
         {
-            cities = new List<Point>(citiesNum);
-            ants = new Ant[antsNum];
-            this.Alpha = alpha;
-            this.Beta = beta;
+            cities = new Point[citiesNum];
+            Ants = new Ant[antsNum];
+            this.alpha = alpha;
+            this.beta = beta;
             this.rho = rho;
+            bestTour = new int[citiesNum];
             PheromoneQuantity = quantity;
             PheromoneIntensity = new double[citiesNum, citiesNum];
             CitiesVisibility = new double[citiesNum, citiesNum];
@@ -39,22 +44,22 @@ namespace AntsColonyTSP
         private void initializeRandomTSP()
         {
             Random rnd = new Random();
-            for (int i = 0; i < cities.Capacity; i++)
+            for (int i = 0; i < cities.Length; i++)
             {
                 cities[i] = new Point(rnd.NextDouble(), rnd.NextDouble());
             }
 
-            for (int i = 0; i < ants.Length; i++)
+            for (int i = 0; i < Ants.Length; i++)
             {
-                ants[i] = new Ant(cities.Count, rnd.Next(cities.Capacity), this);
+                Ants[i] = new Ant(cities.Length, rnd.Next(cities.Length), this);
             }
 
-            for (int i=0; i< cities.Count; i++)
+            for (int i=0; i< cities.Length; i++)
             {
-                for (int j=0; j< cities.Count; j++)
+                for (int j=0; j< cities.Length; j++)
                 {
                     CitiesVisibility[i, j] = 1 / Distance(cities[i], cities[j]);
-                    PheromoneIntensity[i, j] = 1 / Math.Pow(cities.Count, 2);
+                    PheromoneIntensity[i, j] = 1 / Math.Pow(cities.Length, 2);
                 }
             }
         }
@@ -71,18 +76,39 @@ namespace AntsColonyTSP
 
         public void UpdatePheromoneTrail()
         {
-            for(int i=0; i<cities.Count; i++)
+            for(int i=0; i<cities.Length; i++)
             {
-                for(int j=0; j<cities.Count; j++)
+                for(int j=0; j<cities.Length; j++)
                 {
                     pheromoneIntensity[i, j] *= rho;
                 }
             }
 
-            for(int i=0; i < ants.Length; i++)
+            for(int i=0; i < Ants.Length; i++)
             {
-                ants[i].UpdatePheromoneLevels();
+                Ants[i].UpdatePheromoneLevels();
             }
+        }
+
+        public void InitializeAntsTour()
+        {
+            for(int i=0; i<ants.Length; i++)
+            {
+                ants[i].InitializeTour(cities.Length, ants[i].GetCurrentCityIndex());
+            }
+        }
+
+        public double GetBestTourDistance()
+        {
+            foreach(Ant ant in ants)
+            {
+                if(ant.TotalDistanceTraveled < BestTourDistance)
+                {
+                    BestTourDistance = ant.TotalDistanceTraveled;
+                    ant.Tour.CopyTo(bestTour,0);
+                }
+            }
+            return BestTourDistance;
         }
     }
 }
