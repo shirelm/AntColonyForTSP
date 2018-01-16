@@ -19,7 +19,7 @@ namespace AntsColonyTSP
 
         public Ant(int numOfCities, int index, TSP tsp)
         {
-            Tour = new int[numOfCities];
+            Tour = new int[numOfCities + 1];
             this.tsp = tsp;
             InitializeTour(numOfCities, index);
         }
@@ -27,10 +27,9 @@ namespace AntsColonyTSP
         public void InitializeTour(int numOfCities, int index)
         {
             tourIndex = -1;
-            allowedCities = Enumerable.Range(0, numOfCities - 1).ToList();
-            allowedCities.Remove(index);
-            AddCityToTour(index);
             TotalDistanceTraveled = 0;
+            allowedCities = Enumerable.Range(0, numOfCities - 1).ToList();
+            AddCityToTour(index);
         }
 
         public int GetCurrentCityIndex()
@@ -40,39 +39,49 @@ namespace AntsColonyTSP
 
         private void AddCityToTour(int index)
         {
-            tourIndex++;
-            Tour[tourIndex] = index;
+            if (tourIndex>=0)
+                TotalDistanceTraveled += tsp.Distance(GetCurrentCityIndex(), index);
+            Tour[++tourIndex] = index;
+            allowedCities.Remove(index);
         }
 
         public void VisitNextCity()
         {
-            double[] productOfIntensityAndVisibility = new double[allowedCities.Count];
-            double sumOfProducts = 0;
-            double pheromoneIntensity, cityVisibility;
-            for (int j=0; j<allowedCities.Count; j++)
+            // if there are no more allowed cities, return to the first city
+            if (allowedCities.Count == 0)
+                AddCityToTour(Tour[0]);
+            
+            // else proceed to the next city by probability
+            else
             {
-                pheromoneIntensity = tsp.PheromoneIntensity[Tour[tourIndex], allowedCities[j]];
-                cityVisibility = tsp.CitiesVisibility[Tour[tourIndex], allowedCities[j]];
-                productOfIntensityAndVisibility[j] = 
-                    RegulateValue(pheromoneIntensity, tsp.Alpha) *
-                    RegulateValue(cityVisibility, tsp.Beta);
-                sumOfProducts += productOfIntensityAndVisibility[j];
-            }
-
-            double probabilitySum = 0;
-            Random rnd = new Random();
-            double rndNum = rnd.NextDouble();
-            for(int j=0; j < allowedCities.Count; j++)
-            {
-                double probability = productOfIntensityAndVisibility[j] / sumOfProducts;
-                if (rndNum >= probabilitySum && rndNum <= probabilitySum + probability)
+                double[] productOfIntensityAndVisibility = new double[allowedCities.Count];
+                double sumOfProducts = 0;
+                double pheromoneIntensity, cityVisibility;
+                for (int j = 0; j < allowedCities.Count; j++)
                 {
-                    TotalDistanceTraveled += tsp.Distance(Tour[tourIndex], allowedCities[j]);
-                    AddCityToTour(allowedCities[j]);
-                    allowedCities.Remove(Tour[tourIndex]);
-                    break;
+                    pheromoneIntensity = tsp.PheromoneIntensity[GetCurrentCityIndex(), allowedCities[j]];
+                    cityVisibility = tsp.CitiesVisibility[GetCurrentCityIndex(), allowedCities[j]];
+
+                    productOfIntensityAndVisibility[j] =
+                        RegulateValue(pheromoneIntensity, tsp.Alpha) *
+                        RegulateValue(cityVisibility, tsp.Beta);
+
+                    sumOfProducts += productOfIntensityAndVisibility[j];
                 }
-                probabilitySum += probability;
+
+                double probabilitySum = 0;
+                Random rnd = new Random();
+                double rndNum = rnd.NextDouble();
+                for (int j = 0; j < allowedCities.Count; j++)
+                {
+                    double probability = productOfIntensityAndVisibility[j] / sumOfProducts;
+                    if (rndNum >= probabilitySum && rndNum <= probabilitySum + probability)
+                    {
+                        AddCityToTour(allowedCities[j]);
+                        break;
+                    }
+                    probabilitySum += probability;
+                }
             }
 
         }

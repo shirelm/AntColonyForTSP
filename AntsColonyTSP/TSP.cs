@@ -34,7 +34,7 @@ namespace AntsColonyTSP
             this.alpha = alpha;
             this.beta = beta;
             this.rho = rho;
-            bestTour = new int[citiesNum];
+            bestTour = new int[citiesNum + 1];
             PheromoneQuantity = quantity;
             PheromoneIntensity = new double[citiesNum, citiesNum];
             CitiesVisibility = new double[citiesNum, citiesNum];
