@@ -8,7 +8,7 @@ namespace AntsColonyTSP
 {
     public class Ant
     {
-        TSP tsp;
+        AntColonyTSP antColony;
         private List<int> allowedCities;
         int[] tour;
         int tourIndex = -1;
@@ -17,19 +17,19 @@ namespace AntsColonyTSP
         public double TotalDistanceTraveled { get => totalDistanceTraveled; set => totalDistanceTraveled = value; }
         public int[] Tour { get => tour; set => tour = value; }
 
-        public Ant(int numOfCities, int index, TSP tsp)
+        public Ant(AntColonyTSP antColony, int initialCity)
         {
-            Tour = new int[numOfCities + 1];
-            this.tsp = tsp;
-            InitializeTour(numOfCities, index);
+            Tour = new int[antColony.Tsp.NumOfCities + 1];
+            this.antColony = antColony;
+            InitializeTour(antColony.Tsp.NumOfCities, initialCity);
         }
 
-        public void InitializeTour(int numOfCities, int index)
+        public void InitializeTour(int numOfCities, int initialiCity)
         {
             tourIndex = -1;
             TotalDistanceTraveled = 0;
             allowedCities = Enumerable.Range(0, numOfCities - 1).ToList();
-            AddCityToTour(index);
+            AddCityToTour(initialiCity);
         }
 
         public int GetCurrentCityIndex()
@@ -40,7 +40,7 @@ namespace AntsColonyTSP
         private void AddCityToTour(int index)
         {
             if (tourIndex>=0)
-                TotalDistanceTraveled += tsp.Distance(GetCurrentCityIndex(), index);
+                TotalDistanceTraveled += antColony.Tsp.Distance(GetCurrentCityIndex(), index);
             Tour[++tourIndex] = index;
             allowedCities.Remove(index);
         }
@@ -59,12 +59,12 @@ namespace AntsColonyTSP
                 double pheromoneIntensity, cityVisibility;
                 for (int j = 0; j < allowedCities.Count; j++)
                 {
-                    pheromoneIntensity = tsp.PheromoneIntensity[GetCurrentCityIndex(), allowedCities[j]];
-                    cityVisibility = tsp.CitiesVisibility[GetCurrentCityIndex(), allowedCities[j]];
+                    pheromoneIntensity = antColony.PheromoneIntensity[GetCurrentCityIndex(), allowedCities[j]];
+                    cityVisibility = antColony.CitiesVisibility[GetCurrentCityIndex(), allowedCities[j]];
 
                     productOfIntensityAndVisibility[j] =
-                        RegulateValue(pheromoneIntensity, tsp.Alpha) *
-                        RegulateValue(cityVisibility, tsp.Beta);
+                        RegulateValue(pheromoneIntensity, antColony.Alpha) *
+                        RegulateValue(cityVisibility, antColony.Beta);
 
                     sumOfProducts += productOfIntensityAndVisibility[j];
                 }
@@ -102,7 +102,7 @@ namespace AntsColonyTSP
 
         private void UpdatePheromoneIntensityBetweenTwoCities(int city1, int city2)
         {
-            tsp.PheromoneIntensity[city1, city2] += tsp.PheromoneQuantity / TotalDistanceTraveled;
+            antColony.PheromoneIntensity[city1, city2] += antColony.PheromoneQuantity / TotalDistanceTraveled;
         }
     }
 }
