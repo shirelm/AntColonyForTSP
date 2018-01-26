@@ -28,6 +28,15 @@ namespace AntsColonyTSP
         public double BestTourDistance { get => bestTourDistance; set => bestTourDistance = value; }
         public TSP Tsp { get => tsp; }
 
+        /// <summary>
+        ///  Initializes a new AntColony for a given TSP.
+        /// </summary>
+        /// <param name="tsp">The TSP associated with the colony</param>
+        /// <param name="antsNum">The number of ants in the colony</param>
+        /// <param name="alpha">The parameter to regulate the influence of the pheromone intensity</param>
+        /// <param name="beta">The parameter to regulate the influence of the cities visibility</param>
+        /// <param name="rho">The vaporization level of pheromones</param>
+        /// <param name="quantity">The quantity of pheromones of each ant</param>
         public AntColonyTSP(TSP tsp, int antsNum, double alpha, double beta, double rho, double quantity)
         {
             this.tsp = tsp;
@@ -66,6 +75,10 @@ namespace AntsColonyTSP
         }
 
 
+        /// <summary>
+        /// Updates the intensity of pheromones between all pairs of cities.
+        /// This procedure should be called after all the ants completed a tour.
+        /// </summary>
         public void UpdatePheromoneTrail()
         {
             for(int i=0; i<tsp.NumOfCities; i++)
@@ -82,6 +95,10 @@ namespace AntsColonyTSP
             }
         }
 
+        /// <summary>
+        /// Initializes each ant's tour to contain only one initial city city.
+        /// This procedure should be called before every iteration.
+        /// </summary>
         public void InitializeAntsTour()
         {
             for(int i=0; i<ants.Length; i++)
@@ -90,6 +107,10 @@ namespace AntsColonyTSP
             }
         }
 
+        /// <summary>
+        /// Iterates over all the ants to find the ant whose tour is the shortest.
+        /// </summary>
+        /// <returns>The length of the shortest tour</returns>
         public double GetBestTourDistance()
         {
             foreach(Ant ant in ants)
@@ -111,10 +132,7 @@ namespace AntsColonyTSP
             {
                 for (int k = 0; k < Ants.Length; k++)
                 {
-                    for (int i = 0; i < tsp.NumOfCities; i++)
-                    {
-                       Ants[k].VisitNextCity();
-                    }
+                    Ants[k].DoATour();
                 }
                 bestTour = GetBestTourDistance();
                 UpdatePheromoneTrail();

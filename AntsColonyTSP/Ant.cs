@@ -24,6 +24,12 @@ namespace AntsColonyTSP
             InitializeTour(antColony.Tsp.NumOfCities, initialCity);
         }
 
+        /// <summary>
+        /// Initializes the ant's tour to contain only one initial city,
+        /// reset the distance traveled and restore the allowed cities to all the cities.
+        /// </summary>
+        /// <param name="numOfCities"></param>
+        /// <param name="initialiCity"></param>
         public void InitializeTour(int numOfCities, int initialiCity)
         {
             tourIndex = -1;
@@ -45,7 +51,7 @@ namespace AntsColonyTSP
             allowedCities.Remove(index);
         }
 
-        public void VisitNextCity()
+        private void VisitNextCity()
         {
             // if there are no more allowed cities, return to the first city
             if (allowedCities.Count == 0)
@@ -86,11 +92,23 @@ namespace AntsColonyTSP
 
         }
 
-        public static double RegulateValue(double value, double regulationParam)
+
+        public void DoATour()
+        {
+            for (int i = 0; i < antColony.Tsp.NumOfCities; i++)
+            {
+                VisitNextCity();
+            }
+        }
+
+        private static double RegulateValue(double value, double regulationParam)
         {
             return Math.Pow(value, regulationParam);
         }
 
+        /// <summary>
+        /// Updates the pheromone intensity between every pair of cities in the ant's tour.
+        /// </summary>
         public void UpdatePheromoneLevels()
         {
             for (int i = 0; i < Tour.Length - 1; i++)

@@ -41,22 +41,47 @@ namespace AntsColonyTSP
             }
         }
 
+        /// <summary>
+        /// Calculates the distance between two given points.
+        /// </summary>
+        /// <returns>the distance between The two points</returns>
         public static double Distance(Point firstPoint, Point secondPoint)
         {
             return Math.Sqrt(Math.Pow(firstPoint.X - secondPoint.X, 2) + Math.Pow(firstPoint.Y - secondPoint.Y, 2));
         }
 
+        /// <summary>
+        /// Calculates the distance between two cities in the TSP.
+        /// </summary>
+        /// <param name="cityIndex1">The index of the first city</param>
+        /// <param name="cityIndex2">The index of the second city</param>
+        /// <returns>The distance between the two cities</returns>
         public double Distance(int cityIndex1, int cityIndex2)
         {
             return Distance(cities[cityIndex1], cities[cityIndex2]);
         }
 
+        /// <summary>
+        /// Solves the current TSP using the Ant Colony Algorithm.
+        /// </summary>
+        /// <param name="numOfIterations">The number of iterations to perform</param>
+        /// <param name="antsNum">The number of ants in the colony</param>
+        /// <param name="alpha">The parameter to regulate the influence of the pheromone intensity</param>
+        /// <param name="beta">The parameter to regulate the influence of the cities visibility</param>
+        /// <param name="rho">The vaporization level of pheromones</param>
+        /// <param name="quantity">The quantity of pheromones of each ant</param>
+        /// <returns>The length of the shortest tour found using the ant colony algorithm.</returns>
         public double SolveUsingAntColony(int numOfIterations, int antsNum, double alpha, double beta, double rho, double quantity)
         {
             AntColonyTSP antColonyTsp = new AntColonyTSP(this, antsNum, alpha, beta, rho, quantity);
             return antColonyTsp.Solve(numOfIterations);
         }
 
+        /// <summary>
+        ///  Solves the current TSP by choosing the best tour out of many random tours.
+        /// </summary>
+        /// <param name="numOfTours">The number of random tours from which to choose the shortest tour.</param>
+        /// <returns>The length of the shortest of the random tours.</returns>
         public double SolveUsingBestRandomTour(int numOfTours)
         {
             AntColonyTSP antColonyTSP = new AntColonyTSP(
